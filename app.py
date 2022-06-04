@@ -140,7 +140,7 @@ def search_venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
-  # TODO: replace with real venue data from the venues table, using venue_id
+  #  replace with real venue data from the venues table, using venue_id
 
   venue = Venue.query.get(venue_id)
 
@@ -192,8 +192,8 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
+  # : insert form data as a new Venue record in the db, instead
+  # : modify data to be the data object returned from db insertion
   venue = VenueForm(request.form)
   name = venue.name.data
   city = venue.city.data
@@ -221,17 +221,31 @@ def create_venue_submission():
     print("================== ERROR MSG ======================")
     print(sys.exc_info())
     flash('An error occurred. Venue ' + request.form.get('name') + ' could not be listed.')
+  finally:
+    db.session.close()
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   return render_template('pages/home.html')
 
-@app.route('/venues/<venue_id>', methods=['DELETE'])
+@app.route('/venues/<venue_id>/delete')
 def delete_venue(venue_id):
-  # TODO: Complete this endpoint for taking a venue_id, and using
+  # Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+  venue = Venue.query.get(venue_id)
+  try:
+    db.session.delete(venue)
+    db.session.commit()
+    flash('Venue ' + venue.name + ' was successfully deleted!')
+  except:
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
-  return None
+  print("==================detele message =================")
+  
+  return render_template('pages/home.html')
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -334,7 +348,7 @@ def edit_artist(artist_id):
   }
 
 
-  # TODO: populate form with fields from artist with ID <artist_id>
+  #  populate form with fields from artist with ID <artist_id>
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
@@ -359,6 +373,8 @@ def edit_artist_submission(artist_id):
   except:
     db.session.rollback()
     flash('An error occurred. Artist ' + request.form['name'] + ' could not be updated.')
+  finally:
+    db.session.close()
 
   return redirect(url_for('show_artist', artist_id=artist_id))
 
@@ -381,13 +397,48 @@ def edit_venue(venue_id):
     "seeking_description": venue.seeking_description,
     "image_link": venue.image_link
   }
-  
+  # venue={
+  #   "id": 1,
+  #   "name": "The Musical Hop",
+  #   "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
+  #   "address": "1015 Folsom Street",
+  #   "city": "San Francisco",
+  #   "state": "CA",
+  #   "phone": "123-123-1234",
+  #   "website": "https://www.themusicalhop.com",
+  #   "facebook_link": "https://www.facebook.com/TheMusicalHop",
+  #   "seeking_talent": True,
+  #   "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
+  #   "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
+  # }
+  #  populate form with values from venue with ID <venue_id>
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
-  # TODO: take values from the form submitted, and update existing
+  #  take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
+  form = VenueForm(request.form)
+  venue = Venue.query.get(venue_id)
+  venue.name = form.name.data
+  venue.city = form.city.data
+  venue.state = form.state.data
+  venue.phone = form.phone.data
+  venue.facebook_link = form.facebook_link.data
+  venue.image_link = form.image_link.data
+  venue.website_link = form.website_link.data
+  venue.genres = form.genres.data
+  venue.seeking_talent = form.seeking_talent.data
+  venue.seeking_description = form.seeking_description.data
+  try:
+    db.session.commit()
+    flash('Venue ' + request.form['name'] + ' was successfully updated!')
+  except:
+    db.session.rollback()
+    flash('An error occurred. Venue ' + request.form['name'] + ' could not be updated.')
+  finally:
+    db.session.close()
+
   return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
@@ -431,6 +482,8 @@ def create_artist_submission():
     print(sys.exc_info())
     # on unsuccessful db insert, flash an error instead.
     flash('An error occurred. Artist ' + request.form.get('name') + ' could not be listed.')
+  finally:
+    db.session.close()
   return render_template('pages/home.html')
 
 
@@ -473,7 +526,7 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
-  # TODO: insert form data as a new Show record in the db, instead
+  # insert form data as a new Show record in the db, instead
   show = ShowForm(request.form)
   artist_id = show.artist_id.data
   venue_id = show.venue_id.data
@@ -492,6 +545,8 @@ def create_show_submission():
     print(sys.exc_info())
     # on unsuccessful db insert, flash an error instead.
     flash('An error occurred. Show could not be listed.')
+  finally:
+    db.session.close()
 
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   return render_template('pages/home.html')
