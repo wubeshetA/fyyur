@@ -20,7 +20,7 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String))
+    genres = db.Column(db.PickleType, default=[])
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(500))
 
@@ -50,7 +50,7 @@ class Venue(db.Model):
     website_link = db.Column(db.String(500))
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String(1000))
-    genres = db.Column(db.ARRAY(db.String()))
+    genres = db.Column(db.PickleType, default=[])
     upcoming_shows_count = db.Column(db.Integer, default = 0)
     past_shows_count = db.Column(db.Integer, default = 0)
     shows = db.relationship('Show', backref='venue', cascade="save-update, merge, delete")
