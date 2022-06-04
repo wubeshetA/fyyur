@@ -311,9 +311,19 @@ def edit_artist(artist_id):
     "seeking_description": artist.seeking_description,
     "image_link": artist.image_link
   }
+  # populate form with fields from artist with ID <artist_id>
+  form.city.data = artist.get('city')
+  form.state.data = artist.get('state')
+  form.phone.data = artist.get('phone')
+  form.genres.data = artist.get('genres')
+  form.facebook_link.data = artist.get('facebook_link')
+  form.website_link.data = artist.get('website')
+  form.seeking_venue.data = artist.get('seeking_venue')
+  form.seeking_description.data = artist.get('seeking_description')
+  form.image_link.data = artist.get('image_link')
+  form.name.data = artist.get('name')
 
 
-  #  populate form with fields from artist with ID <artist_id>
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
