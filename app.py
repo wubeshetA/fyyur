@@ -1,4 +1,3 @@
-
 #----------------------------------------------------------------------------#
 # Imports
 from pyrsistent import v
@@ -6,8 +5,6 @@ from config import SQLALCHEMY_DATABASE_URI
 from flask_migrate import Migrate
 from models import Artist, Show, Venue, config_db
 import sys
-#----------------------------------------------------------------------------#
-import json
 import dateutil.parser
 import babel
 from flask import Flask, render_template, request, Response, flash, redirect, url_for
@@ -18,12 +15,11 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 
-#----------------------------------------------------------------------------#
-# App Config.
-#----------------------------------------------------------------------------#
 
+# initialize the app
 app = Flask(__name__)
 moment = Moment(app)
+# connect the database with the app with the method from models
 db = config_db(app)
 
 # connect to a local postgresql database
@@ -89,18 +85,9 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-  # implement search on artists with partial string search. Ensure it is case-insensitive.
-  # seach for Hop should return "The Musical Hop".
-  # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
-  # response={
-  #   "count": 1,
-  #   "data": [{
-  #     "id": 2,
-  #     "name": "The Dueling Pianos Bar",
-  #     "num_upcoming_shows": 0,
-  #   }]
-  # }
-  search_results = Venue.query.filter(Venue.name.ilike('%{}%'.format(request.form['search_term']))).all()
+  
+  search_results = (Venue.query.filter(Venue.name.ilike('%{}%'.
+                      format(request.form['search_term']))).all())
   response = {
     "count": len(search_results),
     "data": [{
@@ -109,7 +96,8 @@ def search_venues():
       "num_upcoming_shows": venue.upcoming_shows_count
       } for venue in search_results]
   }
-  return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
+  return (render_template('pages/search_venues.html', results=response,
+                       search_term=request.form.get('search_term', '')))
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
@@ -181,7 +169,9 @@ def create_venue_submission():
   seeking_talent = venue.seeking_talent.data
   seeking_description = venue.seeking_description.data
   
-  new_venue = Venue(name=name, city=city, state=state, address=address, phone=phone, facebook_link=facebook_link, image_link=image_link, website_link=website_link, genres=genres, seeking_talent=seeking_talent, seeking_description=seeking_description)
+  new_venue = Venue(name=name, city=city, state=state, address=address, 
+                  phone=phone, facebook_link=facebook_link, image_link=image_link, 
+                  website_link=website_link, genres=genres, seeking_talent=seeking_talent, seeking_description=seeking_description)
   
   try:
     db.session.add(new_venue)
@@ -265,6 +255,7 @@ def show_artist(artist_id):
 
   # query artist table with id
   artist = Artist.query.get(artist_id)
+  # query shows table with artist_id with the relationship they have
   shows = artist.shows
   past_shows = []
   upcoming_shows = []
@@ -371,7 +362,7 @@ def edit_venue(venue_id):
     "seeking_description": venue.seeking_description,
     "image_link": venue.image_link
   }
-  
+
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
@@ -416,6 +407,7 @@ def create_artist_submission():
   # modify data to be the data object returned from db insertion
 
   artist = ArtistForm(request.form)
+
   name = artist.name.data
   city = artist.city.data
   state = artist.state.data
@@ -438,7 +430,7 @@ def create_artist_submission():
   # on unsuccessful db insert, flash an error instead.
   except:
     db.session.rollback()
-    print("================== ArtistForm ERROR MSG ======================")
+    # print("================== ArtistForm ERROR MSG ======================")
     print(sys.exc_info())
     # on unsuccessful db insert, flash an error instead.
     flash('An error occurred. Artist ' + request.form.get('name') + ' could not be listed.')
@@ -492,7 +484,20 @@ def create_show_submission():
   venue_id = show.venue_id.data
   start_time = show.start_time.data
 
-  new_show = Show(artist_id=artist_id, venue_id=venue_id, start_time=start_time)
+  # getting the show registration time to compare it with the time provided in the form
+  now = datetime.now()
+  # determine if the show is in the past or not based on the date provided on the form
+  # and if now is before start_time, set upcoming to True
+  # if not upcoming = False
+  upcoming = (now < start_time)
+  # print("=================== UPCOMING INFOMATION ======================")
+  # print("start_time", start_time)
+  # print("now", now)
+  # print("upcoming: ", upcoming)
+  
+  # create new show
+  new_show = Show(artist_id=artist_id, venue_id=venue_id,
+                   start_time=start_time, upcoming=upcoming)
   try:
     db.session.add(new_show)
     db.session.commit()
