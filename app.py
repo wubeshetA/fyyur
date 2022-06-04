@@ -312,6 +312,7 @@ def edit_artist(artist_id):
     "image_link": artist.image_link
   }
   # populate form with fields from artist with ID <artist_id>
+  form.name.data = artist.get('name')
   form.city.data = artist.get('city')
   form.state.data = artist.get('state')
   form.phone.data = artist.get('phone')
@@ -321,7 +322,7 @@ def edit_artist(artist_id):
   form.seeking_venue.data = artist.get('seeking_venue')
   form.seeking_description.data = artist.get('seeking_description')
   form.image_link.data = artist.get('image_link')
-  form.name.data = artist.get('name')
+  
 
 
   return render_template('forms/edit_artist.html', form=form, artist=artist)
@@ -372,7 +373,20 @@ def edit_venue(venue_id):
     "seeking_description": venue.seeking_description,
     "image_link": venue.image_link
   }
-
+  
+  # populate form with values from venue with ID <venue_id>
+  form.name.data = venue.get('name')
+  form.city.data = venue.get('city')
+  form.state.data = venue.get('state')
+  form.address.data = venue.get('address')
+  form.genres.data = venue.get('genres')
+  form.phone.data = venue.get('phone')
+  form.facebook_link.data = venue.get('facebook_link')
+  form.website_link.data = venue.get('website')
+  form.seeking_talent.data = venue.get('seeking_talent')
+  form.seeking_description.data = venue.get('seeking_description')
+  form.image_link.data = venue.get('image_link')
+  
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
